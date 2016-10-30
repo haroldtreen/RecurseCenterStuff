@@ -1,5 +1,5 @@
-let SCREEN_WIDTH = 1900;
-let SCREEN_HEIGHT = 1000;
+let SCREEN_WIDTH = window.innerWidth;
+let SCREEN_HEIGHT = window.innerHeight;
 
 let balls;
 function setup() {
@@ -118,7 +118,7 @@ class Ball {
     }
 
     done() {
-        return this.percentComplete() >= 0.98;
+        return this.percentComplete() >= 0.99;
     }
 }
 
