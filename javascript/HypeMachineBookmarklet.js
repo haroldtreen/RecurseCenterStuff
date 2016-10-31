@@ -22,7 +22,7 @@
 
             document.body.appendChild(link);
             link.click();
-        }
+        };
         xhr.send();
     }
 
