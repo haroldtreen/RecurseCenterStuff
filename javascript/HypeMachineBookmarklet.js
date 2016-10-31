@@ -15,7 +15,7 @@
         xhr.open('GET', track.url, true);
         xhr.responseType = 'blob';
         xhr.onload = function(e) {
-            const link = document.createElement('a');
+            var link = document.createElement('a');
             link.download = track.title;
             link.href = (URL || webkitURL).createObjectURL(this.response);
             link.target = '_blank';
@@ -26,7 +26,7 @@
         xhr.send();
     }
 
-    const downloadLimit = Number(prompt('How many tracks to download?'));
+    var downloadLimit = Number(prompt('How many tracks to download?'));
     getTracks().forEach(function(track, index) {
         if (index < downloadLimit) {
             downloadTrack(track);
