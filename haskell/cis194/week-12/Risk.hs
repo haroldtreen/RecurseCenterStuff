@@ -31,63 +31,53 @@ type Army = Int
 data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
     deriving (Show)
 
-simulationRuns = 1000
+simulationRuns = 1000 :: Int
 
 maxDefenders = 2
 maxAttackers = 3
 minDefenders = 0
 minAttackers = 1
-minUnused = 1
 
 traceRand :: Show a => Rand StdGen a -> Rand StdGen a
 traceRand r = fmap traceShowId r
 
+dice :: Int -> Rand StdGen [DieValue]
+dice n = replicateM n die
+
 successProb :: Battlefield -> Rand StdGen Double
-successProb bf = (fmap successCount battles) >>= (\count -> return (count / simulationRuns))
+successProb bf = battles >>=
+    (\battles -> return $ successCount battles) >>=
+        (\count -> return $ count / fromIntegral simulationRuns)
     where
-        battles = sequence (map (\_ -> invade bf) [1..simulationRuns])
+        battles = replicateM simulationRuns (invade bf)
         isSuccess (Battlefield _ ds) = ds <= minDefenders
         successCount = foldl (\count b -> if isSuccess b then count + 1 else count) 0
 
 invade :: Battlefield -> Rand StdGen Battlefield
 invade bf@(Battlefield as ds)
-    | ds <= minDefenders = (return bf)
-    | as <= minAttackers = (return bf)
+    | ds <= minDefenders || as <= minAttackers = (return bf)
     | otherwise = (battle bf) >>= invade
 
 battle :: Battlefield -> Rand StdGen Battlefield
-battle bf = fmap newBattle casualties
+battle bf@(Battlefield as ds) = dice (fst armyTup + snd armyTup) >>=
+    (\dVs -> return $ deaths $ splitDice (armyTup) dVs) >>=
+        (\(aDeaths, dDeaths) -> return $ Battlefield (as - aDeaths) (ds - dDeaths))
+        where armyTup = armies bf
+
+deaths :: [(DieValue, DieValue)] -> (Army, Army)
+deaths dVPairs = foldl compareDie (0, 0) dVPairs
+    where compareDie (aDeaths, dDeaths) (aDie, dDie)
+            | aDie > dDie = (aDeaths, dDeaths + 1)
+            | otherwise = (aDeaths + 1, dDeaths)
+
+splitDice :: (Army, Army) -> [DieValue] -> [(DieValue, DieValue)]
+splitDice (attack, defense) dVs = zip attackDice defenseDice
     where
-        attackingRolls = rollsForArmy $ getAttackingArmy bf
-        defendingRolls = rollsForArmy $ getDefendingArmy bf
-        casualties = getCasualties attackingRolls defendingRolls
-        newBattle (aCas, dCas) = Battlefield (attackers bf - aCas) (defenders bf - dCas)
+        attackDice = reverse . sort $ take attack dVs
+        defenseDice = reverse . sort $ drop attack dVs
 
-getCasualties :: Rand StdGen [DieValue] -> Rand StdGen [DieValue] -> Rand StdGen (Army, Army)
-getCasualties attacks defenses = fmap foldMatches matches
+armies :: Battlefield -> (Army, Army)
+armies bf = (attack, defense)
     where
-        matches = getMatches attacks defenses
-        foldMatches = foldl (\tally match -> sumTuple tally (matchResult match)) (0, 0)
-
-getMatches :: Rand StdGen [DieValue] -> Rand StdGen [DieValue] -> Rand StdGen [(DieValue, DieValue)]
-getMatches attacks defenses = zipFn <*> attacks <*> defenses
-    where
-        numMatches = liftM2 (\l1 l2 -> max (length l1) (length l2)) attacks defenses
-        zipFn = fmap (zip .) (fmap take numMatches)
-
-sumTuple :: Num a => (a, a) -> (a, a) -> (a, a)
-sumTuple (a1, a2) (b1, b2) = (a1 + b1, a2 + b2)
-
-matchResult :: (DieValue, DieValue) -> (Army, Army)
-matchResult (attackVal, defenseVal)
-    | attackVal > defenseVal = (0, 1)
-    | otherwise = (1, 0)
-
-rollsForArmy :: Army -> Rand StdGen [DieValue]
-rollsForArmy army = fmap (reverse . sort) $ sequence (replicate army die)
-
-getDefendingArmy :: Battlefield -> Army
-getDefendingArmy bf = min (defenders bf) maxDefenders
-
-getAttackingArmy :: Battlefield -> Army
-getAttackingArmy bf = min (max 0 $ attackers bf - minUnused) maxDefenders
+        defense = min (defenders bf) maxDefenders
+        attack = min (max 0 $ attackers bf - minAttackers) maxDefenders
