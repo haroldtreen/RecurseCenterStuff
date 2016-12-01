@@ -59,8 +59,8 @@ invade bf@(Battlefield as ds)
     | otherwise = (battle bf) >>= invade
 
 battle :: Battlefield -> Rand StdGen Battlefield
-battle bf@(Battlefield as ds) = dice (fst armyTup + snd armyTup) >>=
-    (\dVs -> return $ deaths $ splitDice (armyTup) dVs) >>=
+battle bf@(Battlefield as ds) = dice (uncurry (+) armyTup) >>=
+    (\dVs -> return . deaths $ splitDice (armyTup) dVs) >>=
         (\(aDeaths, dDeaths) -> return $ Battlefield (as - aDeaths) (ds - dDeaths))
         where armyTup = armies bf
 
@@ -73,8 +73,8 @@ deaths dVPairs = foldl compareDie (0, 0) dVPairs
 splitDice :: (Army, Army) -> [DieValue] -> [(DieValue, DieValue)]
 splitDice (attack, defense) dVs = zip attackDice defenseDice
     where
-        attackDice = reverse . sort $ take attack dVs
-        defenseDice = reverse . sort $ drop attack dVs
+        attackDice = sortBy (flip compare) $ take attack dVs
+        defenseDice = sortBy (flip compare) $ drop attack dVs
 
 armies :: Battlefield -> (Army, Army)
 armies bf = (attack, defense)
