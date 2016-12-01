@@ -1,0 +1,8 @@
+{
+    "env": {
+        "es6": true
+    },
+    "rules": {
+        "space-after-keywords": 0
+    }
+}
