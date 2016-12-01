@@ -4,30 +4,25 @@ let pastDeltas = {};
 
 const turn = (dir) => {
     if (dir === 'L') {
-        currentDir = (currentDir - 1) < 0 ? 3 : currentDir - 1;
+        currentDir -= 1;
+        currentDir = currentDir < 0 ? 3 : currentDir;
     } else if (dir === 'R') {
-        currentDir = (currentDir + 1) > 3 ? 0 : currentDir + 1;
+        currentDir += 1;
+        currentDir = currentDir > 3 ? 0 : currentDir;
     }
 };
 
 const delta = () => {
-    const horizontalSteps = Math.abs(totalSteps.E - totalSteps.W);
-    const horizontalDir = (totalSteps.E - totalSteps.W) >= 0 ? 'E' : 'W';
-    const verticalSteps = Math.abs(totalSteps.N - totalSteps.S);
-    const verticalDir = (totalSteps.N - totalSteps.S) >= 0 ? 'N' : 'S';
-
-    return horizontalSteps + horizontalDir + ' ' + verticalSteps + verticalDir;
+    return `${totalSteps.N - totalSteps.S}N ${totalSteps.E - totalSteps.W}E`;
 };
 
 const walk = (steps) => {
-    const compass = ['N', 'E', 'S', 'W'];
-    const direction = compass[currentDir];
-    const deltas = [];
-
-    for (var i = 0; i < steps; i++) {
+    const direction = (['N', 'E', 'S', 'W'])[currentDir];
+    const deltas = Array.apply(null, { length: steps }).map(() => {
         totalSteps[direction] += 1;
-        deltas.unshift(delta());
-    }
+        return delta();
+    });
+
     return deltas;
 };
 
