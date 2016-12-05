@@ -1,0 +1,23 @@
+{
+  "name": "recurse-center-stuff",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stuff",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haroldtreen/RecurseCenterStuff.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/haroldtreen/RecurseCenterStuff/issues"
+  },
+  "homepage": "https://github.com/haroldtreen/RecurseCenterStuff#readme",
+  "dependencies": {
+    "blueimp-md5": "^2.6.0"
+  }
+}
