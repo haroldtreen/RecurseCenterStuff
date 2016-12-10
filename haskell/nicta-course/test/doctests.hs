@@ -16,7 +16,7 @@ main ::
 main =
   getSources >>= \sources ->
     forM_ (preferredOrderFirst sources) $ \source -> do
-      hPutStrLn stderr $ "Testing " <> source
+      hPutStrLn stderr $ "\nTesting " <> source
       doctest $
           "-isrc"
         : "-idist/build/autogen"
