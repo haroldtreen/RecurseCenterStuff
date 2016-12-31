@@ -52,7 +52,7 @@ To test this module, load ghci in the root of the project directory, and do
 Example output:
 
 $ ghci
-GHCi, version ... 
+GHCi, version ...
 Loading package...
 Loading ...
 [ 1 of 28] Compiling (etc...
@@ -71,43 +71,31 @@ the contents of c
 -}
 
 -- /Tip:/ use @getArgs@ and @run@
-main ::
-  IO ()
-main =
-  error "todo: Course.FileIO#main"
+main :: IO ()
+main = do
+    args <- getArgs
+    run $ headOr Nil args
 
-type FilePath =
-  Chars
+type FilePath = Chars
 
 -- /Tip:/ Use @getFiles@ and @printFiles@.
-run ::
-  Chars
-  -> IO ()
-run =
-  error "todo: Course.FileIO#run"
+run :: Chars -> IO ()
+run args = do
+    fileLines <- readFile args
+    files <- getFiles $ lines fileLines
+    printFiles files
 
-getFiles ::
-  List FilePath
-  -> IO (List (FilePath, Chars))
-getFiles =
-  error "todo: Course.FileIO#getFiles"
+getFiles :: List FilePath -> IO (List (FilePath, Chars))
+getFiles = sequence . (<$>) getFile
 
-getFile ::
-  FilePath
-  -> IO (FilePath, Chars)
-getFile =
-  error "todo: Course.FileIO#getFile"
+getFile :: FilePath -> IO (FilePath, Chars)
+getFile filepath = do
+    file <- readFile filepath
+    return (filepath, file)
+-- getFile = lift2 (<$>) (,) readFile
 
-printFiles ::
-  List (FilePath, Chars)
-  -> IO ()
-printFiles =
-  error "todo: Course.FileIO#printFiles"
+printFiles :: List (FilePath, Chars) -> IO ()
+printFiles = void . sequence . (<$>) (uncurry printFile)
 
-printFile ::
-  FilePath
-  -> Chars
-  -> IO ()
-printFile =
-  error "todo: Course.FileIO#printFile"
-
+printFile :: FilePath -> Chars -> IO ()
+printFile filepath content = putStrLn ("============ " ++ filepath) >> putStrLn content
