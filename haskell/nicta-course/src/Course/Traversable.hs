@@ -20,17 +20,8 @@ import Course.List
 -- * The law of composition
 --   `∀f g. traverse ((g <$>) . f) ≅ (traverse g <$>) . traverse f`
 class Functor t => Traversable t where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> t a
-    -> f (t b)
+  traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 
 instance Traversable List where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> List a
-    -> f (List b)
-  traverse f =
-    foldRight (\a b -> (:.) <$> f a <*> b) (pure Nil)
+  traverse :: Applicative f => (a -> f b) -> List a -> f (List b)
+  traverse f = foldRight (\a b -> (:.) <$> f a <*> b) (pure Nil)
